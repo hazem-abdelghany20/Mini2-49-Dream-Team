@@ -21,17 +21,7 @@ public class Captain {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, unique = true)
-    private String email;
+    private String licenseNumber;
 
-    @Column(nullable = false, unique = true)
-    private String phoneNumber;
-
-    // One Captain can have Many Trips
-    @OneToMany(mappedBy = "captain", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Trip> trips;
-
-    // Example custom method or property
-    private String vehicleDetails; // e.g., "Toyota Camry 2020"
-
+    private Double avgRatingScore;
 }

@@ -1,11 +1,12 @@
-package main.java.com.example.miniapp.controllers;
+package com.example.miniapp.controllers;
 
-import com.example.miniapp.models.Customer;
-import com.example.miniapp.services.CustomerService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
+import java.util.Optional;
+
+import com.example.miniapp.services.CustomerService;
+import com.example.miniapp.models.Customer;
 
 @RestController
 @RequestMapping("/customer")
@@ -40,8 +41,7 @@ public class CustomerController {
 
     @DeleteMapping("/delete/{id}")
     public String deleteCustomer(@PathVariable Long id) {
-        customerService.deleteCustomer(id);
-        return "Customer with ID " + id + " has been deleted.";
+        return customerService.deleteCustomer(id);
     }
 
     @GetMapping("/findByEmailDomain")

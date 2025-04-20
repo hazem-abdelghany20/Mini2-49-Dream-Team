@@ -24,36 +24,41 @@ public class CustomerService {
         return customerRepository.findAll();
     }
 
-    public Optional<Customer> getCustomerById(Long id) {
-        return customerRepository.findById(id);
+    public Customer getCustomerById(Long id) {
+        return customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found with id " + id));
     }
 
-    public Customer createCustomer(Customer customer) {
-        // Add validation or business logic if needed
+    public Customer addCustomer(Customer customer) {
         return customerRepository.save(customer);
     }
 
-    public Optional<Customer> updateCustomer(Long id, Customer customerDetails) {
+    public Customer updateCustomer(Long id, Customer customerDetails) {
         return customerRepository.findById(id)
-            .map(existingCustomer -> {
-                existingCustomer.setName(customerDetails.getName());
-                existingCustomer.setEmail(customerDetails.getEmail());
-                existingCustomer.setPhoneNumber(customerDetails.getPhoneNumber());
-                // Note: Handling the 'trips' list update might require more specific logic
-                return customerRepository.save(existingCustomer);
-            });
+                .map(existingCustomer -> {
+                    existingCustomer.setName(customerDetails.getName());
+                    existingCustomer.setEmail(customerDetails.getEmail());
+                    existingCustomer.setPhoneNumber(customerDetails.getPhoneNumber());
+                    // Note: Handling the 'trips' list update might require more specific logic
+                    return customerRepository.save(existingCustomer);
+                })
+                .orElseThrow(() -> new RuntimeException("Customer not found with id " + id));
     }
 
-    public boolean deleteCustomer(Long id) {
+    public String deleteCustomer(Long id) {
         return customerRepository.findById(id)
-            .map(customer -> {
-                customerRepository.delete(customer);
-                return true;
-            }).orElse(false);
+                .map(customer -> {
+                    customerRepository.delete(customer);
+                    return "Customer deleted successfully";
+                }).orElse("Customer not found");
     }
 
     // Example using custom repository method
-    public Optional<Customer> findCustomerByEmail(String email) {
+    public List<Customer> findCustomersByEmailDomain(String email) {
         return customerRepository.findByEmail(email);
+    }
+
+    public List<Customer> findCustomersByPhonePrefix(String  phoneNumber) {
+        return customerRepository.findByPhoneNumber(phoneNumber);
     }
 }
