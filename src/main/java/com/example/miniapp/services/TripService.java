@@ -1,9 +1,11 @@
 package com.example.miniapp.services;
 
 import com.example.miniapp.models.Trip;
+import com.example.miniapp.models.Captain;
+import com.example.miniapp.models.Customer;
 import com.example.miniapp.repositories.TripRepository;
-import com.example.miniapp.repositories.CaptainRepository; // Needed for assigning captain
-import com.example.miniapp.repositories.CustomerRepository; // Needed for assigning customer
+import com.example.miniapp.repositories.CaptainRepository;
+import com.example.miniapp.repositories.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +20,7 @@ import java.util.Optional;
 public class TripService {
 
     private final TripRepository tripRepository;
-    private final CaptainRepository captainRepository; // Inject repositories for relations
+    private final CaptainRepository captainRepository;
     private final CustomerRepository customerRepository;
 
     @Autowired

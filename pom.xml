@@ -5,8 +5,6 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <!-- Let's use a recent stable version, not the exact 3.4.4 which might not exist yet. -->
-        <!-- Using 3.2.4 as a stable recent version -->
         <version>3.2.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
@@ -16,9 +14,7 @@
     <name>miniapp</name>
     <description>Ride-Sharing Service Application</description>
     <properties>
-        <!-- Specify Java 23 as requested -->
         <java.version>23</java.version>
-         <!-- Ensure Maven uses Java 23 -->
         <maven.compiler.source>23</maven.compiler.source>
         <maven.compiler.target>23</maven.compiler.target>
     </properties>
@@ -60,6 +56,12 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- H2 Database for Testing -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -76,20 +78,19 @@
                     </excludes>
                 </configuration>
             </plugin>
-             <plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version> <!-- Use a version compatible with Java 23 -->
+                <version>3.11.0</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
-                     <compilerArgs>
-                        <!-- Enable preview features if needed for Java 23 -->
-                        <!-- <arg>--enable-preview</arg> -->
+                    <compilerArgs>
+                        <!-- Use arg tag for enable-preview if needed for Java 23 -->
                     </compilerArgs>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 
-</project>
+</project> 
