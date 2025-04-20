@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # PostgreSQL service
+  postgres:
+    image: postgres:15
+    container_name: postgres-ride-sharing
+    environment:
+      POSTGRES_DB: ridesharingdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - ride-sharing-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MongoDB service
+  mongodb:
+    image: mongo:6
+    container_name: mongodb-ride-sharing
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - ride-sharing-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot application service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ride-sharing-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ridesharingdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATA_MONGODB_HOST: mongodb
+      SPRING_DATA_MONGODB_PORT: 27017
+      SPRING_DATA_MONGODB_DATABASE: ridesharingdb
+    ports:
+      - "8080:8080"
+    networks:
+      - ride-sharing-network
+    restart: on-failure
+
+# Networks to be created
+networks:
+  ride-sharing-network:
+    driver: bridge
+
+# Volumes for persisting data
+volumes:
+  postgres-data:
+  mongodb-data:

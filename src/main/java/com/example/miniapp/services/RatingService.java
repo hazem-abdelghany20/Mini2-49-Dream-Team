@@ -1,6 +1,8 @@
 package com.example.miniapp.services;
 
 import com.example.miniapp.models.Rating;
+import com.example.miniapp.models.Captain;
+import com.example.miniapp.models.Customer;
 import com.example.miniapp.repositories.RatingRepository;
 import com.example.miniapp.repositories.TripRepository; // To validate trip exists
 import com.example.miniapp.repositories.CustomerRepository; // To validate customer exists
