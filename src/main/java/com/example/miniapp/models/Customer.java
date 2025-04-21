@@ -27,8 +27,4 @@ public class Customer {
     @Column(nullable = false)
     private String phoneNumber;
 
-    // One Customer can have Many Trips
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Trip> trips;
-
 }
