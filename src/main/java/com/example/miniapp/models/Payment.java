@@ -1,17 +1,14 @@
 package com.example.miniapp.models;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Objects;
 
+/**
+ * Entity representing a payment record for a trip in the ride-sharing application.
+ * This class stores payment-related information like amount, method, and status.
+ */
 @Entity
 @Table(name = "payments")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Payment {
 
     @Id
@@ -19,27 +16,139 @@ public class Payment {
     private Long id;
 
     @Column(nullable = false)
-    private BigDecimal amount;
+    private Double amount;
 
-    @Column(nullable = false)
-    private LocalDateTime paymentTime;
+    @Column(name = "payment_method", nullable = false)
+    private String paymentMethod;
 
-    @Enumerated(EnumType.STRING)
-    private PaymentStatus status; // e.g., PENDING, COMPLETED, FAILED
+    @Column(name = "payment_status", nullable = false)
+    private Boolean paymentStatus;
 
-    @Enumerated(EnumType.STRING)
-    private PaymentMethod paymentMethod; // e.g., CREDIT_CARD, CASH
-
-    // One Payment is associated with One Trip
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "trip_id", referencedColumnName = "id", nullable = false, unique = true)
+    // One-to-One relationship with Trip
+    @OneToOne
+    @JoinColumn(name = "trip_id", unique = true)
     private Trip trip;
 
-    public enum PaymentStatus {
-        PENDING, COMPLETED, FAILED
+    /**
+     * Default constructor
+     */
+    public Payment() {
+        // Required by JPA
     }
 
-    public enum PaymentMethod {
-        CREDIT_CARD, DEBIT_CARD, CASH, WALLET
+    /**
+     * Partial constructor
+     * @param amount Payment amount
+     * @param paymentMethod Method of payment (e.g., card, cash)
+     */
+    public Payment(Double amount, String paymentMethod) {
+        this.amount = amount;
+        this.paymentMethod = paymentMethod;
+        this.paymentStatus = false; // Default to unpaid
+    }
+
+    /**
+     * Constructor for testing
+     * @param amount Payment amount
+     * @param paymentMethod Method of payment (e.g., card, cash)
+     * @param paymentStatus Payment status (true if paid)
+     */
+    public Payment(Double amount, String paymentMethod, Boolean paymentStatus) {
+        this.amount = amount;
+        this.paymentMethod = paymentMethod;
+        this.paymentStatus = paymentStatus;
+    }
+
+    /**
+     * Full constructor
+     * @param amount Payment amount
+     * @param paymentMethod Method of payment (e.g., card, cash)
+     * @param paymentStatus Payment status (true if paid)
+     * @param trip Associated trip
+     */
+    public Payment(Double amount, String paymentMethod, Boolean paymentStatus, Trip trip) {
+        this.amount = amount;
+        this.paymentMethod = paymentMethod;
+        this.paymentStatus = paymentStatus;
+        this.trip = trip;
+    }
+
+    /**
+     * Constructor with ID for testing
+     * @param id Payment ID
+     * @param amount Payment amount
+     * @param paymentMethod Method of payment (e.g., card, cash)
+     * @param paymentStatus Payment status (true if paid)
+     */
+    public Payment(Long id, Double amount, String paymentMethod, Boolean paymentStatus) {
+        this.id = id;
+        this.amount = amount;
+        this.paymentMethod = paymentMethod;
+        this.paymentStatus = paymentStatus;
+    }
+
+    // Getters and Setters
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Double amount) {
+        this.amount = amount;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public Boolean getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(Boolean paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public Trip getTrip() {
+        return trip;
+    }
+
+    public void setTrip(Trip trip) {
+        this.trip = trip;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Payment payment = (Payment) o;
+        return Objects.equals(id, payment.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Payment{" +
+                "id=" + id +
+                ", amount=" + amount +
+                ", paymentMethod='" + paymentMethod + '\'' +
+                ", paymentStatus=" + paymentStatus +
+                '}';
     }
 }

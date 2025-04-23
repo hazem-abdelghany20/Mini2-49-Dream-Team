@@ -6,24 +6,39 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Repository interface for Rating document operations in MongoDB
+ */
 @Repository
-public interface RatingRepository extends MongoRepository<Rating, String> { // ID is String for MongoDB
+public interface RatingRepository extends MongoRepository<Rating, String> {
 
-    // Find all ratings for a specific trip
-    List<Rating> findByTripId(Long tripId);
+    /**
+     * Find ratings for a specific entity by ID and type
+     * @param entityId ID of the entity (captain, customer, or trip)
+     * @param entityType Type of the entity (captain, customer, or trip)
+     * @return List of ratings for the entity
+     */
+    List<Rating> findByEntityIdAndEntityType(Long entityId, String entityType);
 
-    // Find all ratings given by a specific rater (customer or captain)
-    List<Rating> findByRaterId(Long raterId);
+    /**
+     * Find ratings with a score greater than or equal to a minimum value
+     * @param minScore Minimum score threshold
+     * @return List of ratings with scores greater than or equal to minScore
+     */
+    List<Rating> findByScoreGreaterThanEqual(Integer minScore);
 
-    // Find all ratings received by a specific entity (customer or captain)
-    List<Rating> findByRatedId(Long ratedId);
+    /**
+     * Find ratings for a specific entity type
+     * @param entityType Type of the entity (captain, customer, or trip)
+     * @return List of ratings for the entity type
+     */
+    List<Rating> findByEntityType(String entityType);
 
-    // Find ratings by rater type
-    List<Rating> findByRaterType(Rating.RaterType raterType);
-
-    // Find ratings given by a specific rater of a specific type
-    List<Rating> findByRaterIdAndRaterType(Long raterId, Rating.RaterType raterType);
-
-    // Find ratings received by a specific entity, potentially filtered by rater type
-    List<Rating> findByRatedIdAndRaterType(Long ratedId, Rating.RaterType raterType);
+    /**
+     * Find ratings with scores in a specific range
+     * @param minScore Minimum score
+     * @param maxScore Maximum score
+     * @return List of ratings with scores in the specified range
+     */
+    List<Rating> findByScoreBetween(Integer minScore, Integer maxScore);
 }

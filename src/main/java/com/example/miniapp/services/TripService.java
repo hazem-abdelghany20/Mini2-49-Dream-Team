@@ -1,110 +1,156 @@
 package com.example.miniapp.services;
 
 import com.example.miniapp.models.Trip;
-import com.example.miniapp.models.Captain;
-import com.example.miniapp.models.Customer;
 import com.example.miniapp.repositories.TripRepository;
-import com.example.miniapp.repositories.CaptainRepository;
-import com.example.miniapp.repositories.CustomerRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import jakarta.persistence.EntityNotFoundException;
+
 import java.time.LocalDateTime;
-
 import java.util.List;
-import java.util.Optional;
 
+/**
+ * Service class for handling Trip-related business logic
+ */
 @Service
-@Transactional
 public class TripService {
 
     private final TripRepository tripRepository;
-    private final CaptainRepository captainRepository;
-    private final CustomerRepository customerRepository;
 
     @Autowired
-    public TripService(TripRepository tripRepository,
-                       CaptainRepository captainRepository,
-                       CustomerRepository customerRepository) {
+    public TripService(TripRepository tripRepository) {
         this.tripRepository = tripRepository;
-        this.captainRepository = captainRepository;
-        this.customerRepository = customerRepository;
     }
 
-    public List<Trip> getAllTrips() {
-        return tripRepository.findAll();
-    }
-
-    public Optional<Trip> getTripById(Long id) {
-        return tripRepository.findById(id);
-    }
-
-    public Trip createTrip(Trip trip, Long customerId, Long captainId) {
-        // Fetch the customer and captain entities
-        Customer customer = customerRepository.findById(customerId)
-            .orElseThrow(() -> new EntityNotFoundException("Customer not found with id: " + customerId));
-        Captain captain = captainRepository.findById(captainId)
-            .orElseThrow(() -> new EntityNotFoundException("Captain not found with id: " + captainId));
-
-        // Associate them with the trip
-        trip.setCustomer(customer);
-        trip.setCaptain(captain);
-
-        // Set initial status and time if not provided
-        if (trip.getStartTime() == null) {
-            trip.setStartTime(LocalDateTime.now());
+    /**
+     * Add a new trip
+     * @param trip Trip object to be added
+     * @return Saved trip with generated ID
+     */
+    @Transactional
+    public Trip addTrip(Trip trip) {
+        if (trip == null) {
+            throw new IllegalArgumentException("Trip cannot be null");
         }
-        if (trip.getStatus() == null) {
-            trip.setStatus(Trip.TripStatus.REQUESTED);
+
+        // Validate required fields
+        if (trip.getTripDate() == null) {
+            throw new IllegalArgumentException("Trip date is required");
+        }
+        if (trip.getOrigin() == null || trip.getOrigin().trim().isEmpty()) {
+            throw new IllegalArgumentException("Origin location is required");
+        }
+        if (trip.getDestination() == null || trip.getDestination().trim().isEmpty()) {
+            throw new IllegalArgumentException("Destination location is required");
+        }
+        if (trip.getTripCost() == null || trip.getTripCost() < 0) {
+            throw new IllegalArgumentException("Valid trip cost is required");
         }
 
         return tripRepository.save(trip);
     }
 
-    public Optional<Trip> updateTrip(Long id, Trip tripDetails) {
-         return tripRepository.findById(id)
-            .map(existingTrip -> {
-                existingTrip.setStartLocation(tripDetails.getStartLocation());
-                existingTrip.setEndLocation(tripDetails.getEndLocation());
-                existingTrip.setStartTime(tripDetails.getStartTime());
-                existingTrip.setEndTime(tripDetails.getEndTime());
-                existingTrip.setStatus(tripDetails.getStatus());
-                // Note: Updating captain/customer might require specific logic or separate endpoints
-                return tripRepository.save(existingTrip);
-            });
+    /**
+     * Get all trips
+     * @return List of all trips
+     */
+    public List<Trip> getAllTrips() {
+        return tripRepository.findAll();
     }
 
-    public boolean deleteTrip(Long id) {
+    /**
+     * Get trip by ID
+     * @param id ID of the trip to retrieve
+     * @return Trip with the specified ID
+     * @throws EntityNotFoundException if trip not found
+     */
+    public Trip getTripById(Long id) {
         return tripRepository.findById(id)
-            .map(trip -> {
-                tripRepository.delete(trip);
-                return true;
-            }).orElse(false);
+                .orElse(null);
     }
 
-    // Custom query methods
-    public List<Trip> getTripsByCaptain(Long captainId) {
+    /**
+     * Update trip details
+     * @param id ID of the trip to update
+     * @param trip Updated trip details
+     * @return Updated trip
+     * @throws EntityNotFoundException if trip not found
+     */
+    @Transactional
+    public Trip updateTrip(Long id, Trip trip) {
+        if (trip == null) {
+            throw new IllegalArgumentException("Trip cannot be null");
+        }
+
+        // Check if trip exists
+        Trip existingTrip = tripRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Trip not found with ID: " + id));
+
+        // Update fields if provided
+        if (trip.getTripDate() != null) {
+            existingTrip.setTripDate(trip.getTripDate());
+        }
+        if (trip.getOrigin() != null && !trip.getOrigin().trim().isEmpty()) {
+            existingTrip.setOrigin(trip.getOrigin());
+        }
+        if (trip.getDestination() != null && !trip.getDestination().trim().isEmpty()) {
+            existingTrip.setDestination(trip.getDestination());
+        }
+        if (trip.getTripCost() != null && trip.getTripCost() >= 0) {
+            existingTrip.setTripCost(trip.getTripCost());
+        }
+        if (trip.getCaptain() != null) {
+            existingTrip.setCaptain(trip.getCaptain());
+        }
+        if (trip.getCustomer() != null) {
+            existingTrip.setCustomer(trip.getCustomer());
+        }
+
+        return tripRepository.save(existingTrip);
+    }
+
+    /**
+     * Delete a trip
+     * @param id ID of the trip to delete
+     * @throws EntityNotFoundException if trip not found
+     */
+    @Transactional
+    public void deleteTrip(Long id) {
+        if (tripRepository.existsById(id)) {
+           return;
+        }
+        tripRepository.deleteById(id);
+    }
+
+    /**
+     * Find trips within a date range
+     * @param startDate Start of the date range
+     * @param endDate End of the date range
+     * @return List of trips within the date range
+     */
+    public List<Trip> findTripsWithinDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+        if (startDate == null || endDate == null) {
+            throw new IllegalArgumentException("Start date and end date cannot be null");
+        }
+
+        if (startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException("Start date cannot be after end date");
+        }
+
+        return tripRepository.findByTripDateBetween(startDate, endDate);
+    }
+
+    /**
+     * Find trips by captain ID
+     * @param captainId ID of the captain
+     * @return List of trips associated with the captain
+     */
+    public List<Trip> findTripsByCaptainId(Long captainId) {
+        if (captainId == null) {
+            throw new IllegalArgumentException("Captain ID cannot be null");
+        }
+
         return tripRepository.findByCaptainId(captainId);
-    }
-
-    public List<Trip> getTripsByCustomer(Long customerId) {
-        return tripRepository.findByCustomerId(customerId);
-    }
-
-    public List<Trip> getTripsByStatus(Trip.TripStatus status) {
-        return tripRepository.findByStatus(status);
-    }
-
-    // Method to update trip status (example business logic)
-    public Optional<Trip> updateTripStatus(Long id, Trip.TripStatus newStatus) {
-        return tripRepository.findById(id)
-            .map(trip -> {
-                trip.setStatus(newStatus);
-                if (newStatus == Trip.TripStatus.COMPLETED || newStatus == Trip.TripStatus.CANCELLED) {
-                    trip.setEndTime(LocalDateTime.now());
-                }
-                return tripRepository.save(trip);
-            });
     }
 }

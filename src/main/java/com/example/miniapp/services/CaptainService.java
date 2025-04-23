@@ -26,7 +26,7 @@ public class CaptainService {
 
     public Captain getCaptainById(Long id) {
         return captainRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Captain not found with id " + id));
+                .orElse(null);
     }
 
     public List<Captain> getCaptainsByRating(Double ratingThreshold) {
@@ -34,7 +34,7 @@ public class CaptainService {
     }
 
     public Captain getCaptainByLicenseNumber(String licenseNumber) {
-        return captainRepository.findByLicenseNumber(licenseNumber)
-                .orElseThrow(() -> new RuntimeException("Captain not found with license number " + licenseNumber));
+        // Return null or an empty Optional instead of throwing an exception
+        return captainRepository.findByLicenseNumber(licenseNumber).orElse(null);
     }
 }
