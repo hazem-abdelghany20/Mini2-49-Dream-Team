@@ -42,14 +42,16 @@ public class PaymentService {
     }
 
 
+    public Payment getPaymentById(Long id) {
+        return paymentRepository.findById(id).orElse(null);
+    }
+
     public List<Payment> getAllPayments() {
         return paymentRepository.findAll();
     }
 
 
-    public Payment getPaymentById(Long id) {
-        return paymentRepository.findById(id).orElse(null);
-    }
+
 
 
     @Transactional
