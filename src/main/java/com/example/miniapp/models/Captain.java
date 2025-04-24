@@ -5,10 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Entity representing a captain (driver) in the ride-sharing application.
- * This class stores captain information including their rating and associated trips.
- */
+
 @Entity
 @Table(name = "captains")
 public class Captain {
@@ -29,46 +26,26 @@ public class Captain {
     @OneToMany(mappedBy = "captain", cascade = CascadeType.ALL)
     private List<Trip> trips = new ArrayList<>();
 
-    /**
-     * Default constructor required by JPA
-     */
+
     public Captain() {
         // Required by JPA
     }
 
-    /**
-     * Partial constructor with essential fields
-     *
-     * @param name Captain's name
-     * @param licenseNumber Captain's license number
-     */
+
     public Captain(String name, String licenseNumber) {
         this.name = name;
         this.licenseNumber = licenseNumber;
         this.avgRatingScore = 0.0; // Default rating for new captains
     }
 
-    /**
-     * Full constructor with all fields
-     *
-     * @param name Captain's name
-     * @param licenseNumber Captain's license number
-     * @param avgRatingScore Captain's average rating score
-     */
+
     public Captain(String name, String licenseNumber, Double avgRatingScore) {
         this.name = name;
         this.licenseNumber = licenseNumber;
         this.avgRatingScore = avgRatingScore;
     }
 
-    /**
-     * Constructor with ID parameter (for testing purposes)
-     *
-     * @param id Captain's ID
-     * @param name Captain's name
-     * @param licenseNumber Captain's license number
-     * @param avgRatingScore Captain's average rating score
-     */
+
     public Captain(Long id, String name, String licenseNumber, Double avgRatingScore) {
         this.id = id;
         this.name = name;
@@ -76,7 +53,7 @@ public class Captain {
         this.avgRatingScore = avgRatingScore;
     }
 
-    // Getters and setters
+
 
     public Long getId() {
         return id;
@@ -118,21 +95,13 @@ public class Captain {
         this.trips = trips;
     }
 
-    /**
-     * Add a trip to this captain's list of trips
-     *
-     * @param trip The trip to add
-     */
+
     public void addTrip(Trip trip) {
         trips.add(trip);
         trip.setCaptain(this);
     }
 
-    /**
-     * Remove a trip from this captain's list of trips
-     *
-     * @param trip The trip to remove
-     */
+
     public void removeTrip(Trip trip) {
         trips.remove(trip);
         trip.setCaptain(null);

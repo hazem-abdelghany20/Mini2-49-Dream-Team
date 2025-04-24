@@ -9,9 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * RESTful controller for Payment-related operations
- */
+
 @RestController
 @RequestMapping("/payment")
 public class PaymentController {
@@ -23,11 +21,7 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
-    /**
-     * Add a new payment
-     * @param payment The payment object to be added
-     * @return The saved payment with generated ID
-     */
+
     @PostMapping("/addPayment")
     public ResponseEntity<Payment> addPayment(@RequestBody Payment payment) {
         try {
@@ -38,21 +32,13 @@ public class PaymentController {
         }
     }
 
-    /**
-     * Get all payment records
-     * @return List of all payment records
-     */
+
     @GetMapping("/allPayments")
     public ResponseEntity<List<Payment>> getAllPayments() {
         List<Payment> payments = paymentService.getAllPayments();
         return new ResponseEntity<>(payments, HttpStatus.OK);
     }
 
-    /**
-     * Get a specific payment by ID
-     * @param id The ID of the payment to retrieve
-     * @return The payment with the specified ID
-     */
     @GetMapping("/{id}")
     public ResponseEntity<Payment> getPaymentById(@PathVariable Long id) {
         try {
@@ -63,12 +49,7 @@ public class PaymentController {
         }
     }
 
-    /**
-     * Update payment details
-     * @param id The ID of the payment to update
-     * @param payment The updated payment details
-     * @return The updated payment
-     */
+
     @PutMapping("/update/{id}")
     public ResponseEntity<Payment> updatePayment(@PathVariable Long id, @RequestBody Payment payment) {
         try {
@@ -81,11 +62,7 @@ public class PaymentController {
         }
     }
 
-    /**
-     * Delete a payment
-     * @param id The ID of the payment to delete
-     * @return A confirmation message
-     */
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deletePayment(@PathVariable Long id) {
         try {
@@ -96,11 +73,7 @@ public class PaymentController {
         }
     }
 
-    /**
-     * Find payments by trip ID
-     * @param tripId The ID of the trip to find payments for
-     * @return List of payments associated with the specified trip
-     */
+
     @GetMapping("/findByTripId")
     public ResponseEntity<List<Payment>> findPaymentsByTripId(@RequestParam Long tripId) {
         try {
@@ -111,11 +84,7 @@ public class PaymentController {
         }
     }
 
-    /**
-     * Find payments with an amount greater than a threshold
-     * @param threshold The minimum amount threshold
-     * @return List of payments with amounts exceeding the threshold
-     */
+
     @GetMapping("/findByAmountThreshold")
     public ResponseEntity<List<Payment>> findPaymentsWithAmountGreaterThan(@RequestParam Double threshold) {
         try {

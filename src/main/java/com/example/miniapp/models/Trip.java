@@ -4,10 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-/**
- * Entity representing a trip (journey) in the ride-sharing application.
- * This class stores trip information and its relationships with Captain and Customer.
- */
+
 @Entity
 @Table(name = "trips")
 public class Trip {
@@ -40,34 +37,19 @@ public class Trip {
     @OneToOne(mappedBy = "trip", cascade = CascadeType.ALL)
     private Payment payment;
 
-    /**
-     * Default constructor required by JPA
-     */
+
     public Trip() {
         // Required by JPA
     }
 
-    /**
-     * Partial constructor with essential fields
-     *
-     * @param tripDate Date and time of the trip
-     * @param origin Starting location
-     * @param destination Ending location
-     */
+
     public Trip(LocalDateTime tripDate, String origin, String destination) {
         this.tripDate = tripDate;
         this.origin = origin;
         this.destination = destination;
     }
 
-    /**
-     * Constructor with essential fields and cost
-     *
-     * @param tripDate Date and time of the trip
-     * @param origin Starting location
-     * @param destination Ending location
-     * @param tripCost Cost of the trip
-     */
+
     public Trip(LocalDateTime tripDate, String origin, String destination, Double tripCost) {
         this.tripDate = tripDate;
         this.origin = origin;
@@ -75,16 +57,7 @@ public class Trip {
         this.tripCost = tripCost;
     }
 
-    /**
-     * Full constructor with all fields except ID
-     *
-     * @param tripDate Date and time of the trip
-     * @param origin Starting location
-     * @param destination Ending location
-     * @param tripCost Cost of the trip
-     * @param captain Captain assigned to the trip
-     * @param customer Customer who booked the trip
-     */
+
     public Trip(LocalDateTime tripDate, String origin, String destination, Double tripCost,
                 Captain captain, Customer customer) {
         this.tripDate = tripDate;
@@ -98,15 +71,7 @@ public class Trip {
 
 
 
-    /**
-     * Constructor with ID parameter (for testing purposes)
-     *
-     * @param id Trip ID
-     * @param tripDate Date and time of the trip
-     * @param origin Starting location
-     * @param destination Ending location
-     * @param tripCost Cost of the trip
-     */
+
     public Trip(Long id, LocalDateTime tripDate, String origin, String destination, Double tripCost) {
         this.id = id;
         this.tripDate = tripDate;

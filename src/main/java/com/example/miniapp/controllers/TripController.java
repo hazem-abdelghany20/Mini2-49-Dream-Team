@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * Controller class for handling Trip-related HTTP requests
- */
+
 @RestController
 @RequestMapping("/trip")
 public class TripController {
@@ -26,11 +24,7 @@ public class TripController {
         this.tripService = tripService;
     }
 
-    /**
-     * Add a new trip
-     * @param trip Trip object to be added
-     * @return The saved trip with generated ID
-     */
+
     @PostMapping("/addTrip")
     public ResponseEntity<Trip> addTrip(@RequestBody Trip trip) {
         try {
@@ -41,21 +35,14 @@ public class TripController {
         }
     }
 
-    /**
-     * Get all trips
-     * @return List of all trips
-     */
+
     @GetMapping("/allTrips")
     public ResponseEntity<List<Trip>> getAllTrips() {
         List<Trip> trips = tripService.getAllTrips();
         return new ResponseEntity<>(trips, HttpStatus.OK);
     }
 
-    /**
-     * Get trip by ID
-     * @param id ID of the trip to retrieve
-     * @return Trip with the specified ID
-     */
+
     @GetMapping("/{id}")
     public ResponseEntity<Trip> getTripById(@PathVariable Long id) {
         try {
@@ -66,12 +53,7 @@ public class TripController {
         }
     }
 
-    /**
-     * Update trip details
-     * @param id ID of the trip to update
-     * @param trip Updated trip details
-     * @return Updated trip
-     */
+
     @PutMapping("/update/{id}")
     public ResponseEntity<Trip> updateTrip(@PathVariable Long id, @RequestBody Trip trip) {
         try {
@@ -84,11 +66,7 @@ public class TripController {
         }
     }
 
-    /**
-     * Delete a trip
-     * @param id ID of the trip to delete
-     * @return Status message
-     */
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteTrip(@PathVariable Long id) {
         try {
@@ -99,12 +77,7 @@ public class TripController {
         }
     }
 
-    /**
-     * Find trips within a date range
-     * @param startDate Start of the date range
-     * @param endDate End of the date range
-     * @return List of trips within the date range
-     */
+
     @GetMapping("/findByDateRange")
     public ResponseEntity<List<Trip>> findTripsWithinDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
@@ -117,11 +90,7 @@ public class TripController {
         }
     }
 
-    /**
-     * Find trips by captain ID
-     * @param captainId ID of the captain
-     * @return List of trips associated with the captain
-     */
+
     @GetMapping("/findByCaptainId")
     public ResponseEntity<List<Trip>> findTripsByCaptainId(@RequestParam Long captainId) {
         try {
