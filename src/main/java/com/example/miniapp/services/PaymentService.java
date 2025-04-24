@@ -4,17 +4,17 @@ import com.example.miniapp.models.Payment;
 import com.example.miniapp.models.Trip;
 import com.example.miniapp.repositories.PaymentRepository;
 import com.example.miniapp.repositories.TripRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service class for handling Payment-related business logic
+ */
 @Service
-@Transactional
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
@@ -26,94 +26,102 @@ public class PaymentService {
         this.tripRepository = tripRepository;
     }
 
+    /**
+     * Add a new payment
+     * @param payment Payment object to be added
+     * @return Saved payment with generated ID, or null if there is an issue
+     */
+    @Transactional
+    public Payment addPayment(Payment payment) {
+        if (payment == null) {
+            return null;
+        }
+
+        // Check if trip exists
+        if (payment.getTrip() != null) {
+            Trip trip = tripRepository.findById(payment.getTrip().getId()).orElse(null);
+            // Set the trip and save the payment
+            payment.setTrip(trip);
+        }
+
+        return paymentRepository.save(payment);
+    }
+
+    /**
+     * Get all payments
+     * @return List of all payments
+     */
     public List<Payment> getAllPayments() {
         return paymentRepository.findAll();
     }
 
-    public Optional<Payment> getPaymentById(Long id) {
-        return paymentRepository.findById(id);
+    /**
+     * Get payment by ID
+     * @param id ID of the payment to retrieve
+     * @return Payment with the specified ID, or null if not found
+     */
+    public Payment getPaymentById(Long id) {
+        return paymentRepository.findById(id).orElse(null);
     }
 
-    public Optional<Payment> getPaymentByTripId(Long tripId) {
+    /**
+     * Update payment details
+     * @param id ID of the payment to update
+     * @param payment Updated payment details
+     * @return Updated payment, or null if not found
+     */
+    @Transactional
+    public Payment updatePayment(Long id, Payment payment) {
+        if (payment == null) {
+            return null;
+        }
+
+        // Check if payment exists
+        Payment existingPayment = paymentRepository.findById(id).orElse(null);
+
+        // If payment does not exist, return null
+        if (existingPayment == null) {
+            return null;
+        }
+
+        // Update fields
+        if(payment.getAmount() != null)
+            existingPayment.setAmount(payment.getAmount());
+        if(payment.getPaymentMethod() != null)
+            existingPayment.setPaymentMethod(payment.getPaymentMethod());
+        if(payment.getPaymentStatus() != null)
+            existingPayment.setPaymentStatus(payment.getPaymentStatus());
+
+
+
+
+        return paymentRepository.save(existingPayment);
+    }
+
+    /**
+     * Delete a payment
+     * @param id ID of the payment to delete
+     */
+    @Transactional
+    public void deletePayment(Long id) {
+        paymentRepository.deleteById(id);
+    }
+
+    /**
+     * Find payments by trip ID
+     * @param tripId ID of the trip
+     * @return List of payments associated with the trip
+     */
+    public List<Payment> findPaymentsByTripId(Long tripId) {
         return paymentRepository.findByTripId(tripId);
     }
 
-    public Payment createPayment(Payment payment, Long tripId) {
-        // Find the associated trip
-        Trip trip = tripRepository.findById(tripId)
-            .orElseThrow(() -> new EntityNotFoundException("Trip not found with id: " + tripId));
-
-        // Check if payment already exists for this trip
-        if(paymentRepository.findByTripId(tripId).isPresent()){
-            throw new IllegalStateException("Payment already exists for trip id: " + tripId);
-        }
-
-        // Associate payment with the trip
-        payment.setTrip(trip);
-
-        // Set default values if needed
-        if (payment.getPaymentTime() == null) {
-            payment.setPaymentTime(LocalDateTime.now());
-        }
-        if (payment.getStatus() == null) {
-            payment.setStatus(Payment.PaymentStatus.PENDING);
-        }
-        // Automatically set amount based on trip details (example - needs logic)
-        // payment.setAmount(calculateTripFare(trip));
-
-        Payment savedPayment = paymentRepository.save(payment);
-
-        // Update trip to link payment (if not already handled by cascade)
-        // trip.setPayment(savedPayment);
-        // tripRepository.save(trip); // May not be needed depending on cascade/mapping
-
-        return savedPayment;
+    /**
+     * Find payments with amount greater than threshold
+     * @param threshold Minimum amount threshold
+     * @return List of payments with amount greater than threshold
+     */
+    public List<Payment> findByAmountThreshold(Double threshold) {
+        return paymentRepository.findByAmountGreaterThan(threshold);
     }
-
-    public Optional<Payment> updatePaymentStatus(Long paymentId, Payment.PaymentStatus newStatus) {
-        return paymentRepository.findById(paymentId)
-            .map(payment -> {
-                payment.setStatus(newStatus);
-                // Add any other logic needed when status changes
-                return paymentRepository.save(payment);
-            });
-    }
-
-    // Update method (example - could be more specific)
-    public Optional<Payment> updatePayment(Long id, Payment paymentDetails) {
-        return paymentRepository.findById(id)
-            .map(existingPayment -> {
-                existingPayment.setAmount(paymentDetails.getAmount());
-                existingPayment.setStatus(paymentDetails.getStatus());
-                existingPayment.setPaymentMethod(paymentDetails.getPaymentMethod());
-                existingPayment.setPaymentTime(paymentDetails.getPaymentTime());
-                // Updating the trip association might be complex/restricted
-                return paymentRepository.save(existingPayment);
-            });
-    }
-
-    public boolean deletePayment(Long id) {
-        return paymentRepository.findById(id)
-            .map(payment -> {
-                // Maybe add logic here - e.g., cannot delete completed payment?
-                paymentRepository.delete(payment);
-                return true;
-            }).orElse(false);
-    }
-
-    // Find payments by status
-    public List<Payment> getPaymentsByStatus(Payment.PaymentStatus status) {
-        return paymentRepository.findByStatus(status);
-    }
-
-     // Find payments by payment method
-    public List<Payment> getPaymentsByMethod(Payment.PaymentMethod method) {
-        return paymentRepository.findByPaymentMethod(method);
-    }
-
-    // Example helper method placeholder
-    // private BigDecimal calculateTripFare(Trip trip) {
-    //     // Implement logic to calculate fare based on distance, time, etc.
-    //     return new BigDecimal("10.00"); // Placeholder
-    // }
 }

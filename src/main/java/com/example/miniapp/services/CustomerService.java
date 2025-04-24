@@ -26,7 +26,7 @@ public class CustomerService {
 
     public Customer getCustomerById(Long id) {
         return customerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Customer not found with id " + id));
+                .orElse(null);
     }
 
     public Customer addCustomer(Customer customer) {
@@ -42,7 +42,7 @@ public class CustomerService {
                     // Note: Handling the 'trips' list update might require more specific logic
                     return customerRepository.save(existingCustomer);
                 })
-                .orElseThrow(() -> new RuntimeException("Customer not found with id " + id));
+                .orElse(null);
     }
 
     public String deleteCustomer(Long id) {
@@ -50,7 +50,7 @@ public class CustomerService {
                 .map(customer -> {
                     customerRepository.delete(customer);
                     return "Customer deleted successfully";
-                }).orElse("Customer not found");
+                }).orElse(null);
     }
 
     // Example using custom repository method

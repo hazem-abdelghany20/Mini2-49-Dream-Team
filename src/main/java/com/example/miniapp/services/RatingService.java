@@ -1,147 +1,189 @@
 package com.example.miniapp.services;
 
-import com.example.miniapp.models.Rating;
 import com.example.miniapp.models.Captain;
-import com.example.miniapp.models.Customer;
+import com.example.miniapp.models.Rating;
+import com.example.miniapp.repositories.CaptainRepository;
 import com.example.miniapp.repositories.RatingRepository;
-import com.example.miniapp.repositories.TripRepository; // To validate trip exists
-import com.example.miniapp.repositories.CustomerRepository; // To validate customer exists
-import com.example.miniapp.repositories.CaptainRepository; // To validate captain exists
-import jakarta.persistence.EntityNotFoundException; // Reusing JPA exception for simplicity
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-// No @Transactional needed usually for MongoRepository methods unless combining with JPA
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service class for handling Rating-related business logic
+ */
 @Service
 public class RatingService {
 
     private final RatingRepository ratingRepository;
-    // Inject relational repositories if validation is needed
-    private final TripRepository tripRepository;
-    private final CustomerRepository customerRepository;
     private final CaptainRepository captainRepository;
 
     @Autowired
-    public RatingService(RatingRepository ratingRepository,
-                         TripRepository tripRepository,
-                         CustomerRepository customerRepository,
-                         CaptainRepository captainRepository) {
+    public RatingService(RatingRepository ratingRepository, CaptainRepository captainRepository) {
         this.ratingRepository = ratingRepository;
-        this.tripRepository = tripRepository;
-        this.customerRepository = customerRepository;
         this.captainRepository = captainRepository;
     }
 
+    /**
+     * Add a new rating
+     * @param rating Rating object to be added
+     * @return Saved rating with generated ID, or null if invalid input
+     */
+    public Rating addRating(Rating rating) {
+        if (rating == null) {
+            return null;
+        }
+
+        // Validate required fields
+        if (rating.getEntityId() == null || rating.getEntityType() == null || rating.getEntityType().trim().isEmpty() ||
+                rating.getScore() == null || rating.getScore() < 1 || rating.getScore() > 5) {
+            return null; // Return null if any required field is missing or invalid
+        }
+
+        // Set rating date if not provided
+        if (rating.getRatingDate() == null) {
+            rating.setRatingDate(LocalDateTime.now());
+        }
+
+        // Save the rating
+        Rating savedRating = ratingRepository.save(rating);
+
+        // Update captain's average rating if this is a captain rating
+        if ("captain".equalsIgnoreCase(rating.getEntityType())) {
+            updateCaptainAverageRating(rating.getEntityId());
+        }
+
+        return savedRating;
+    }
+
+    /**
+     * Update an existing rating
+     * @param id ID of the rating to update
+     * @param updatedRating Updated rating details
+     * @return Updated rating, or null if rating not found
+     */
+    public Rating updateRating(String id, Rating updatedRating) {
+        if (updatedRating == null) {
+            return null;
+        }
+
+        // Check if rating exists
+        Rating existingRating = ratingRepository.findById(id).orElse(null);
+        if (existingRating == null) {
+            return null; // Rating not found
+        }
+
+        // Update fields if provided
+        if (updatedRating.getScore() != null && updatedRating.getScore() >= 1 && updatedRating.getScore() <= 5) {
+            existingRating.setScore(updatedRating.getScore());
+        }
+        if (updatedRating.getComment() != null) {
+            existingRating.setComment(updatedRating.getComment());
+        }
+
+        // Save updated rating
+        Rating savedRating = ratingRepository.save(existingRating);
+
+        // Update captain's average rating if this is a captain rating
+        if ("captain".equalsIgnoreCase(existingRating.getEntityType())) {
+            updateCaptainAverageRating(existingRating.getEntityId());
+        }
+
+        return savedRating;
+    }
+
+    /**
+     * Delete a rating by ID
+     * @param id ID of the rating to delete
+     */
+    public void deleteRating(String id) {
+        Rating rating = ratingRepository.findById(id).orElse(null);
+
+        if (rating == null) {
+            return; // Rating not found, nothing to delete
+        }
+
+        // Store entity details before deletion for possible updates
+        Long entityId = rating.getEntityId();
+        String entityType = rating.getEntityType();
+
+        // Delete the rating
+        ratingRepository.deleteById(id);
+
+        // Update captain's average rating if this was a captain rating
+        if ("captain".equalsIgnoreCase(entityType)) {
+            updateCaptainAverageRating(entityId);
+        }
+    }
+
+    /**
+     * Get ratings for a specific entity by ID and type
+     * @param entityId ID of the entity
+     * @param entityType Type of the entity
+     * @return List of ratings for the entity, or empty list if invalid input
+     */
+    public List<Rating> getRatingsByEntity(Long entityId, String entityType) {
+        return ratingRepository.findByEntityIdAndEntityType(entityId, entityType);
+    }
+
+    /**
+     * Find ratings with a score greater than or equal to a minimum value
+     * @param minScore Minimum score threshold
+     * @return List of ratings with scores above the threshold, or empty list if invalid score
+     */
+    public List<Rating> findRatingsAboveScore(int minScore) {
+        return ratingRepository.findByScoreGreaterThanEqual(minScore);
+    }
+
+    /**
+     * Get all ratings
+     * @return List of all ratings
+     */
     public List<Rating> getAllRatings() {
         return ratingRepository.findAll();
     }
 
-    public Optional<Rating> getRatingById(String id) {
-        return ratingRepository.findById(id);
+    /**
+     * Get rating by ID
+     * @param id ID of the rating to retrieve
+     * @return Rating with the specified ID, or null if not found
+     */
+    public Rating getRatingById(String id) {
+        return ratingRepository.findById(id).orElse(null);
     }
 
-    public Rating createRating(Rating rating) {
-        // --- Validation --- 
-        // 1. Validate Trip exists
-        tripRepository.findById(rating.getTripId())
-            .orElseThrow(() -> new EntityNotFoundException("Cannot create rating: Trip not found with id " + rating.getTripId()));
+    /**
+     * Find ratings by entity type
+     * @param entityType Type of the entity
+     * @return List of ratings for the entity type, or empty list if invalid entity type
+     */
+    public List<Rating> findRatingsByEntityType(String entityType) {
+        return ratingRepository.findByEntityType(entityType);
+    }
 
-        // 2. Validate Rater and Rated entities exist based on RaterType
-        if (rating.getRaterType() == Rating.RaterType.CUSTOMER) {
-            customerRepository.findById(rating.getRaterId())
-                .orElseThrow(() -> new EntityNotFoundException("Cannot create rating: Rater (Customer) not found with id " + rating.getRaterId()));
-            captainRepository.findById(rating.getRatedId())
-                .orElseThrow(() -> new EntityNotFoundException("Cannot create rating: Rated (Captain) not found with id " + rating.getRatedId()));
-        } else { // Rater is CAPTAIN
-             captainRepository.findById(rating.getRaterId())
-                .orElseThrow(() -> new EntityNotFoundException("Cannot create rating: Rater (Captain) not found with id " + rating.getRaterId()));
-            customerRepository.findById(rating.getRatedId())
-                .orElseThrow(() -> new EntityNotFoundException("Cannot create rating: Rated (Customer) not found with id " + rating.getRatedId()));
-        }
-        
-        // 3. Check rating value bounds
-        if (rating.getRatingValue() < 1 || rating.getRatingValue() > 5) {
-             throw new IllegalArgumentException("Rating value must be between 1 and 5.");
-        }
+    /**
+     * Helper method to update a captain's average rating score
+     * @param captainId ID of the captain
+     */
+    private void updateCaptainAverageRating(Long captainId) {
+        List<Rating> captainRatings = ratingRepository.findByEntityIdAndEntityType(captainId, "captain");
 
-        // 4. TODO: Optional - Check if a rating already exists for this trip/rater/rated combo?
-
-        // --- End Validation ---
-
-        // Set rating time if not provided
-        if (rating.getRatingTime() == null) {
-            rating.setRatingTime(LocalDateTime.now());
+        if (captainRatings.isEmpty()) {
+            return; // No ratings for this captain
         }
 
-        return ratingRepository.save(rating);
-    }
-
-    public Optional<Rating> updateRating(String id, Rating ratingDetails) {
-        return ratingRepository.findById(id)
-            .map(existingRating -> {
-                // Usually, only comment and maybe ratingValue can be updated
-                existingRating.setComment(ratingDetails.getComment());
-                if (ratingDetails.getRatingValue() >= 1 && ratingDetails.getRatingValue() <= 5) {
-                    existingRating.setRatingValue(ratingDetails.getRatingValue());
-                } else {
-                     throw new IllegalArgumentException("Rating value must be between 1 and 5.");
-                }
-                // You generally wouldn't change tripId, raterId, ratedId, raterType, or ratingTime
-                return ratingRepository.save(existingRating);
-            });
-    }
-
-    public boolean deleteRating(String id) {
-        return ratingRepository.findById(id)
-            .map(rating -> {
-                ratingRepository.delete(rating);
-                return true;
-            }).orElse(false);
-    }
-
-    // Custom query methods
-    public List<Rating> getRatingsByTripId(Long tripId) {
-        return ratingRepository.findByTripId(tripId);
-    }
-
-    public List<Rating> getRatingsByRater(Long raterId) {
-        return ratingRepository.findByRaterId(raterId);
-    }
-
-    public List<Rating> getRatingsForRated(Long ratedId) {
-        return ratingRepository.findByRatedId(ratedId);
-    }
-
-    public List<Rating> getRatingsByRaterType(Rating.RaterType raterType) {
-        return ratingRepository.findByRaterType(raterType);
-    }
-    
-    // Example: Calculate average rating for a Captain
-    public Double getAverageRatingForCaptain(Long captainId) {
-        List<Rating> ratings = ratingRepository.findByRatedIdAndRaterType(captainId, Rating.RaterType.CUSTOMER);
-        if (ratings.isEmpty()) {
-            return null; // Or 0.0, depending on requirements
-        }
-        return ratings.stream()
-                .mapToInt(Rating::getRatingValue)
+        // Calculate average rating
+        double averageRating = captainRatings.stream()
+                .mapToInt(Rating::getScore)
                 .average()
-                .orElse(0.0); // Default if stream is somehow empty after filtering
-    }
+                .orElse(0.0);
 
-     // Example: Calculate average rating for a Customer
-    public Double getAverageRatingForCustomer(Long customerId) {
-        List<Rating> ratings = ratingRepository.findByRatedIdAndRaterType(customerId, Rating.RaterType.CAPTAIN);
-         if (ratings.isEmpty()) {
-            return null; // Or 0.0
-        }
-        return ratings.stream()
-                .mapToInt(Rating::getRatingValue)
-                .average()
-                .orElse(0.0); 
+        // Update captain's average rating in the database
+        captainRepository.findById(captainId).ifPresent(captain -> {
+            captain.setAvgRatingScore(averageRating);
+            captainRepository.save(captain);
+        });
     }
-
 }
