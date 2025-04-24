@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Optional;
 
 /**
  * Service class for handling Rating-related business logic
@@ -29,22 +29,17 @@ public class RatingService {
     /**
      * Add a new rating
      * @param rating Rating object to be added
-     * @return Saved rating with generated ID
+     * @return Saved rating with generated ID, or null if invalid input
      */
     public Rating addRating(Rating rating) {
         if (rating == null) {
-            throw new IllegalArgumentException("Rating cannot be null");
+            return null;
         }
 
         // Validate required fields
-        if (rating.getEntityId() == null) {
-            throw new IllegalArgumentException("Entity ID is required");
-        }
-        if (rating.getEntityType() == null || rating.getEntityType().trim().isEmpty()) {
-            throw new IllegalArgumentException("Entity type is required");
-        }
-        if (rating.getScore() == null || rating.getScore() < 1 || rating.getScore() > 5) {
-            throw new IllegalArgumentException("Valid score between 1 and 5 is required");
+        if (rating.getEntityId() == null || rating.getEntityType() == null || rating.getEntityType().trim().isEmpty() ||
+                rating.getScore() == null || rating.getScore() < 1 || rating.getScore() > 5) {
+            return null; // Return null if any required field is missing or invalid
         }
 
         // Set rating date if not provided
@@ -67,18 +62,17 @@ public class RatingService {
      * Update an existing rating
      * @param id ID of the rating to update
      * @param updatedRating Updated rating details
-     * @return Updated rating
+     * @return Updated rating, or null if rating not found
      */
     public Rating updateRating(String id, Rating updatedRating) {
         if (updatedRating == null) {
-            throw new IllegalArgumentException("Rating cannot be null");
+            return null;
         }
 
         // Check if rating exists
-        Rating existingRating = ratingRepository.findById(id)
-                .orElse(null);
-        if( existingRating == null) {
-            return null;
+        Rating existingRating = ratingRepository.findById(id).orElse(null);
+        if (existingRating == null) {
+            return null; // Rating not found
         }
 
         // Update fields if provided
@@ -105,12 +99,11 @@ public class RatingService {
      * @param id ID of the rating to delete
      */
     public void deleteRating(String id) {
-        Rating rating = ratingRepository.findById(id) .orElse(null);
+        Rating rating = ratingRepository.findById(id).orElse(null);
 
-        if(rating == null) {
-            return;
+        if (rating == null) {
+            return; // Rating not found, nothing to delete
         }
-
 
         // Store entity details before deletion for possible updates
         Long entityId = rating.getEntityId();
@@ -129,14 +122,11 @@ public class RatingService {
      * Get ratings for a specific entity by ID and type
      * @param entityId ID of the entity
      * @param entityType Type of the entity
-     * @return List of ratings for the entity
+     * @return List of ratings for the entity, or empty list if invalid input
      */
     public List<Rating> getRatingsByEntity(Long entityId, String entityType) {
-        if (entityId == null) {
-            throw new IllegalArgumentException("Entity ID cannot be null");
-        }
-        if (entityType == null || entityType.trim().isEmpty()) {
-            throw new IllegalArgumentException("Entity type cannot be null or empty");
+        if (entityId == null || entityType == null || entityType.trim().isEmpty()) {
+            return List.of(); // Return empty list if invalid input
         }
 
         return ratingRepository.findByEntityIdAndEntityType(entityId, entityType);
@@ -145,11 +135,11 @@ public class RatingService {
     /**
      * Find ratings with a score greater than or equal to a minimum value
      * @param minScore Minimum score threshold
-     * @return List of ratings with scores above the threshold
+     * @return List of ratings with scores above the threshold, or empty list if invalid score
      */
     public List<Rating> findRatingsAboveScore(int minScore) {
         if (minScore < 1 || minScore > 5) {
-            throw new IllegalArgumentException("Score must be between 1 and 5");
+            return List.of(); // Return empty list if invalid score range
         }
 
         return ratingRepository.findByScoreGreaterThanEqual(minScore);
@@ -166,21 +156,20 @@ public class RatingService {
     /**
      * Get rating by ID
      * @param id ID of the rating to retrieve
-     * @return Rating with the specified ID
+     * @return Rating with the specified ID, or null if not found
      */
     public Rating getRatingById(String id) {
-        return ratingRepository.findById(id)
-                .orElse(null);
+        return ratingRepository.findById(id).orElse(null);
     }
 
     /**
      * Find ratings by entity type
      * @param entityType Type of the entity
-     * @return List of ratings for the entity type
+     * @return List of ratings for the entity type, or empty list if invalid entity type
      */
     public List<Rating> findRatingsByEntityType(String entityType) {
         if (entityType == null || entityType.trim().isEmpty()) {
-            throw new IllegalArgumentException("Entity type cannot be null or empty");
+            return List.of(); // Return empty list if invalid entity type
         }
 
         return ratingRepository.findByEntityType(entityType);
@@ -194,7 +183,7 @@ public class RatingService {
         List<Rating> captainRatings = ratingRepository.findByEntityIdAndEntityType(captainId, "captain");
 
         if (captainRatings.isEmpty()) {
-            return;
+            return; // No ratings for this captain
         }
 
         // Calculate average rating
