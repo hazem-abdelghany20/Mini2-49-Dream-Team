@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL service
   postgres:
     image: postgres:15
     container_name: postgres-ride-sharing
@@ -21,7 +20,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # MongoDB service
   mongodb:
     image: mongo:6
     container_name: mongodb-ride-sharing
@@ -37,17 +35,14 @@ services:
       timeout: 5s
       retries: 5
 
-  # Spring Boot application service
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: ride-sharing-app
     depends_on:
-      postgres:
-        condition: service_healthy
-      mongodb:
-        condition: service_healthy
+      - postgres
+      - mongodb
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ridesharingdb
       SPRING_DATASOURCE_USERNAME: postgres
@@ -61,12 +56,10 @@ services:
       - ride-sharing-network
     restart: on-failure
 
-# Networks to be created
 networks:
   ride-sharing-network:
     driver: bridge
 
-# Volumes for persisting data
 volumes:
   postgres-data:
   mongodb-data:
