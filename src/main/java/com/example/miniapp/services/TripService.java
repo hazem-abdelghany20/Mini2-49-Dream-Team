@@ -2,7 +2,6 @@ package com.example.miniapp.services;
 
 import com.example.miniapp.models.Trip;
 import com.example.miniapp.repositories.TripRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,27 +25,19 @@ public class TripService {
     /**
      * Add a new trip
      * @param trip Trip object to be added
-     * @return Saved trip with generated ID
+     * @return Saved trip with generated ID, or null if invalid input
      */
     @Transactional
     public Trip addTrip(Trip trip) {
         if (trip == null) {
-            throw new IllegalArgumentException("Trip cannot be null");
+            return null;
         }
 
-        // Validate required fields
-        if (trip.getTripDate() == null) {
-            throw new IllegalArgumentException("Trip date is required");
-        }
-        if (trip.getOrigin() == null || trip.getOrigin().trim().isEmpty()) {
-            throw new IllegalArgumentException("Origin location is required");
-        }
-        if (trip.getDestination() == null || trip.getDestination().trim().isEmpty()) {
-            throw new IllegalArgumentException("Destination location is required");
-        }
-        if (trip.getTripCost() == null || trip.getTripCost() < 0) {
-            throw new IllegalArgumentException("Valid trip cost is required");
-        }
+//        // Validate required fields
+//        if (trip.getTripDate() == null || trip.getOrigin() == null || trip.getOrigin().trim().isEmpty() ||
+//                trip.getDestination() == null || trip.getDestination().trim().isEmpty() || trip.getTripCost() == null || trip.getTripCost() < 0) {
+//            return null; // Return null if any required field is missing or invalid
+//        }
 
         return tripRepository.save(trip);
     }
@@ -62,30 +53,29 @@ public class TripService {
     /**
      * Get trip by ID
      * @param id ID of the trip to retrieve
-     * @return Trip with the specified ID
-     * @throws EntityNotFoundException if trip not found
+     * @return Trip with the specified ID, or null if not found
      */
     public Trip getTripById(Long id) {
-        return tripRepository.findById(id)
-                .orElse(null);
+        return tripRepository.findById(id).orElse(null);
     }
 
     /**
      * Update trip details
      * @param id ID of the trip to update
      * @param trip Updated trip details
-     * @return Updated trip
-     * @throws EntityNotFoundException if trip not found
+     * @return Updated trip, or null if trip not found
      */
     @Transactional
     public Trip updateTrip(Long id, Trip trip) {
         if (trip == null) {
-            throw new IllegalArgumentException("Trip cannot be null");
+            return null;
         }
 
         // Check if trip exists
-        Trip existingTrip = tripRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Trip not found with ID: " + id));
+        Trip existingTrip = tripRepository.findById(id).orElse(null);
+        if (existingTrip == null) {
+            return null; // Trip not found
+        }
 
         // Update fields if provided
         if (trip.getTripDate() != null) {
@@ -113,44 +103,30 @@ public class TripService {
     /**
      * Delete a trip
      * @param id ID of the trip to delete
-     * @throws EntityNotFoundException if trip not found
      */
     @Transactional
     public void deleteTrip(Long id) {
         if (tripRepository.existsById(id)) {
-           return;
+            tripRepository.deleteById(id);
         }
-        tripRepository.deleteById(id);
     }
 
     /**
      * Find trips within a date range
      * @param startDate Start of the date range
      * @param endDate End of the date range
-     * @return List of trips within the date range
+     * @return List of trips within the date range, or empty list if invalid dates
      */
     public List<Trip> findTripsWithinDateRange(LocalDateTime startDate, LocalDateTime endDate) {
-        if (startDate == null || endDate == null) {
-            throw new IllegalArgumentException("Start date and end date cannot be null");
-        }
-
-        if (startDate.isAfter(endDate)) {
-            throw new IllegalArgumentException("Start date cannot be after end date");
-        }
-
         return tripRepository.findByTripDateBetween(startDate, endDate);
     }
 
     /**
      * Find trips by captain ID
      * @param captainId ID of the captain
-     * @return List of trips associated with the captain
+     * @return List of trips associated with the captain, or empty list if captainId is invalid
      */
     public List<Trip> findTripsByCaptainId(Long captainId) {
-        if (captainId == null) {
-            throw new IllegalArgumentException("Captain ID cannot be null");
-        }
-
         return tripRepository.findByCaptainId(captainId);
     }
 }
