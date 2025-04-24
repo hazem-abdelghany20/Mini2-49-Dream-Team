@@ -33,11 +33,11 @@ public class TripService {
             return null;
         }
 
-        // Validate required fields
-        if (trip.getTripDate() == null || trip.getOrigin() == null || trip.getOrigin().trim().isEmpty() ||
-                trip.getDestination() == null || trip.getDestination().trim().isEmpty() || trip.getTripCost() == null || trip.getTripCost() < 0) {
-            return null; // Return null if any required field is missing or invalid
-        }
+//        // Validate required fields
+//        if (trip.getTripDate() == null || trip.getOrigin() == null || trip.getOrigin().trim().isEmpty() ||
+//                trip.getDestination() == null || trip.getDestination().trim().isEmpty() || trip.getTripCost() == null || trip.getTripCost() < 0) {
+//            return null; // Return null if any required field is missing or invalid
+//        }
 
         return tripRepository.save(trip);
     }
@@ -118,10 +118,6 @@ public class TripService {
      * @return List of trips within the date range, or empty list if invalid dates
      */
     public List<Trip> findTripsWithinDateRange(LocalDateTime startDate, LocalDateTime endDate) {
-        if (startDate == null || endDate == null || startDate.isAfter(endDate)) {
-            return List.of(); // Return empty list if dates are invalid
-        }
-
         return tripRepository.findByTripDateBetween(startDate, endDate);
     }
 
@@ -131,10 +127,6 @@ public class TripService {
      * @return List of trips associated with the captain, or empty list if captainId is invalid
      */
     public List<Trip> findTripsByCaptainId(Long captainId) {
-        if (captainId == null) {
-            return List.of(); // Return empty list if captainId is invalid
-        }
-
         return tripRepository.findByCaptainId(captainId);
     }
 }

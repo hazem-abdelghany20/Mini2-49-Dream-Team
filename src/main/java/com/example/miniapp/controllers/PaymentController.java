@@ -39,22 +39,6 @@ public class PaymentController {
     }
 
     /**
-     * Add a payment for a specific trip
-     * @param payment The payment object to be added
-     * @param tripId The ID of the trip to associate with the payment
-     * @return The saved payment with generated ID
-     */
-    @PostMapping("/addPaymentForTrip")
-    public ResponseEntity<Payment> addPaymentForTrip(@RequestBody Payment payment, @RequestParam Long tripId) {
-        try {
-            Payment savedPayment = paymentService.addPayment(payment, tripId);
-            return new ResponseEntity<>(savedPayment, HttpStatus.CREATED);
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    /**
      * Get all payment records
      * @return List of all payment records
      */

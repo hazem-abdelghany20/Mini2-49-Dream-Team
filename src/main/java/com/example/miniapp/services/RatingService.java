@@ -125,10 +125,6 @@ public class RatingService {
      * @return List of ratings for the entity, or empty list if invalid input
      */
     public List<Rating> getRatingsByEntity(Long entityId, String entityType) {
-        if (entityId == null || entityType == null || entityType.trim().isEmpty()) {
-            return List.of(); // Return empty list if invalid input
-        }
-
         return ratingRepository.findByEntityIdAndEntityType(entityId, entityType);
     }
 
@@ -138,10 +134,6 @@ public class RatingService {
      * @return List of ratings with scores above the threshold, or empty list if invalid score
      */
     public List<Rating> findRatingsAboveScore(int minScore) {
-        if (minScore < 1 || minScore > 5) {
-            return List.of(); // Return empty list if invalid score range
-        }
-
         return ratingRepository.findByScoreGreaterThanEqual(minScore);
     }
 
@@ -168,10 +160,6 @@ public class RatingService {
      * @return List of ratings for the entity type, or empty list if invalid entity type
      */
     public List<Rating> findRatingsByEntityType(String entityType) {
-        if (entityType == null || entityType.trim().isEmpty()) {
-            return List.of(); // Return empty list if invalid entity type
-        }
-
         return ratingRepository.findByEntityType(entityType);
     }
 
