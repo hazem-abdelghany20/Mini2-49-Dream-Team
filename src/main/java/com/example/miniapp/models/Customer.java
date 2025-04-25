@@ -5,10 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Entity representing a customer in the ride-sharing application.
- * This class stores customer information and their associated trips.
- */
+
 @Entity
 @Table(name = "customers")
 public class Customer {
@@ -29,45 +26,24 @@ public class Customer {
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<Trip> trips = new ArrayList<>();
 
-    /**
-     * Default constructor required by JPA
-     */
     public Customer() {
         // Required by JPA
     }
 
-    /**
-     * Partial constructor with essential fields
-     *
-     * @param name Customer's name
-     * @param email Customer's email
-     */
+
     public Customer(String name, String email) {
         this.name = name;
         this.email = email;
     }
 
-    /**
-     * Full constructor with all fields
-     *
-     * @param name Customer's name
-     * @param email Customer's email
-     * @param phoneNumber Customer's phone number
-     */
+
     public Customer(String name, String email, String phoneNumber) {
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;
     }
 
-    /**
-     * Constructor with ID parameter (for testing purposes)
-     *
-     * @param id Customer's ID
-     * @param name Customer's name
-     * @param email Customer's email
-     * @param phoneNumber Customer's phone number
-     */
+
     public Customer(Long id, String name, String email, String phoneNumber) {
         this.id = id;
         this.name = name;
@@ -75,7 +51,7 @@ public class Customer {
         this.phoneNumber = phoneNumber;
     }
 
-    // Getters and setters
+
 
     public Long getId() {
         return id;
@@ -117,21 +93,13 @@ public class Customer {
         this.trips = trips;
     }
 
-    /**
-     * Add a trip to this customer's list of trips
-     *
-     * @param trip The trip to add
-     */
+
     public void addTrip(Trip trip) {
         trips.add(trip);
         trip.setCustomer(this);
     }
 
-    /**
-     * Remove a trip from this customer's list of trips
-     *
-     * @param trip The trip to remove
-     */
+
     public void removeTrip(Trip trip) {
         trips.remove(trip);
         trip.setCustomer(null);

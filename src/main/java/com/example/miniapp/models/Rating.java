@@ -6,10 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-/**
- * Document representing a rating record stored in MongoDB.
- * This class stores feedback information for captains, customers, or trips.
- */
+
 @Document(collection = "ratings")
 public class Rating {
 
@@ -26,20 +23,12 @@ public class Rating {
 
     private LocalDateTime ratingDate;
 
-    /**
-     * Default constructor
-     */
+
     public Rating() {
         // Required by MongoDB
     }
 
-    /**
-     * Partial constructor with essential fields
-     *
-     * @param entityId ID of the entity being rated (captain, customer, or trip)
-     * @param entityType Type of entity being rated (captain, customer, or trip)
-     * @param score Rating score (1-5)
-     */
+
     public Rating(Long entityId, String entityType, Integer score) {
         this.entityId = entityId;
         this.entityType = entityType;
@@ -47,15 +36,7 @@ public class Rating {
         this.ratingDate = LocalDateTime.now();
     }
 
-    /**
-     * Full constructor without ID
-     *
-     * @param entityId ID of the entity being rated (captain, customer, or trip)
-     * @param entityType Type of entity being rated (captain, customer, or trip)
-     * @param score Rating score (1-5)
-     * @param comment Optional comment about the rating
-     * @param ratingDate Date and time when the rating was submitted
-     */
+
     public Rating(Long entityId, String entityType, Integer score, String comment, LocalDateTime ratingDate) {
         this.entityId = entityId;
         this.entityType = entityType;
@@ -64,16 +45,7 @@ public class Rating {
         this.ratingDate = ratingDate;
     }
 
-    /**
-     * Full constructor with ID (for testing purposes)
-     *
-     * @param id Rating ID
-     * @param entityId ID of the entity being rated (captain, customer, or trip)
-     * @param entityType Type of entity being rated (captain, customer, or trip)
-     * @param score Rating score (1-5)
-     * @param comment Optional comment about the rating
-     * @param ratingDate Date and time when the rating was submitted
-     */
+
     public Rating(String id, Long entityId, String entityType, Integer score, String comment, LocalDateTime ratingDate) {
         this.id = id;
         this.entityId = entityId;
@@ -83,7 +55,7 @@ public class Rating {
         this.ratingDate = ratingDate;
     }
 
-    // Getters and setters
+
 
     public String getId() {
         return id;

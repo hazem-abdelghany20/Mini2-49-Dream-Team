@@ -10,9 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-/**
- * Controller class for handling Rating-related HTTP requests
- */
+
 @RestController
 @RequestMapping("/rating")
 public class RatingController {
@@ -24,11 +22,7 @@ public class RatingController {
         this.ratingService = ratingService;
     }
 
-    /**
-     * Add a new rating
-     * @param rating Rating object to be added
-     * @return The saved rating with generated ID
-     */
+
     @PostMapping("/addRating")
     public ResponseEntity<Rating> addRating(@RequestBody Rating rating) {
         try {
@@ -39,12 +33,7 @@ public class RatingController {
         }
     }
 
-    /**
-     * Update a rating
-     * @param id ID of the rating to update
-     * @param updatedRating Updated rating details
-     * @return The updated rating
-     */
+
     @PutMapping("/update/{id}")
     public ResponseEntity<Rating> updateRating(@PathVariable String id, @RequestBody Rating updatedRating) {
         try {
@@ -57,11 +46,7 @@ public class RatingController {
         }
     }
 
-    /**
-     * Delete a rating
-     * @param id ID of the rating to delete
-     * @return Status message
-     */
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteRating(@PathVariable String id) {
         try {
@@ -72,12 +57,7 @@ public class RatingController {
         }
     }
 
-    /**
-     * Find ratings for a specific entity
-     * @param entityId ID of the entity (captain, customer, or trip)
-     * @param entityType Type of the entity (captain, customer, or trip)
-     * @return List of ratings for the entity
-     */
+
     @GetMapping("/findByEntity")
     public ResponseEntity<List<Rating>> findRatingsByEntity(
             @RequestParam Long entityId,
@@ -90,11 +70,7 @@ public class RatingController {
         }
     }
 
-    /**
-     * Find ratings with score above a specific value
-     * @param minScore Minimum score threshold
-     * @return List of ratings with scores above the threshold
-     */
+
     @GetMapping("/findAboveScore")
     public ResponseEntity<List<Rating>> findRatingsAboveScore(@RequestParam int minScore) {
         try {
@@ -105,21 +81,14 @@ public class RatingController {
         }
     }
 
-    /**
-     * Get all ratings
-     * @return List of all ratings
-     */
+
     @GetMapping("/allRatings")
     public ResponseEntity<List<Rating>> getAllRatings() {
         List<Rating> ratings = ratingService.getAllRatings();
         return new ResponseEntity<>(ratings, HttpStatus.OK);
     }
 
-    /**
-     * Get rating by ID
-     * @param id ID of the rating to retrieve
-     * @return Rating with the specified ID
-     */
+
     @GetMapping("/{id}")
     public ResponseEntity<Rating> getRatingById(@PathVariable String id) {
         try {
@@ -130,11 +99,7 @@ public class RatingController {
         }
     }
 
-    /**
-     * Find ratings by entity type
-     * @param entityType Type of the entity (captain, customer, or trip)
-     * @return List of ratings for the entity type
-     */
+
     @GetMapping("/findByEntityType")
     public ResponseEntity<List<Rating>> findRatingsByEntityType(@RequestParam String entityType) {
         try {
