@@ -653,20 +653,7 @@ class Mini2ApplicationTests {
         assertEquals("Updated Destination", response.getBody().getDestination());
     }
 
-    @Test
-    public void testControllerDeleteTrip() {
-        Trip trip = new Trip(LocalDateTime.now(), "Origin D", "Destination D", 500.0);
-        tripService.addTrip(trip);
 
-        ResponseEntity<String> response = restTemplate.exchange(
-                BASE_URL_TRIP + "/delete/" + trip.getId(),
-                HttpMethod.DELETE,
-                null,
-                String.class
-        );
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-    }
 
     @Test
     public void testControllerFindTripsWithinDateRange() {
@@ -684,6 +671,21 @@ class Mini2ApplicationTests {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
     }
+    @Test
+    public void testControllerDeleteTrip() {
+        Trip trip = new Trip(LocalDateTime.now(), "Origin D", "Destination D", 500.0);
+        tripService.addTrip(trip);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                BASE_URL_TRIP + "/delete/" + trip.getId(),
+                HttpMethod.DELETE,
+                null,
+                String.class
+        );
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
 
 
     @Test
@@ -694,18 +696,19 @@ class Mini2ApplicationTests {
         assertEquals("Jane Doe", savedCaptain.getName());
     }
 
-    @Test
-    public void testServiceAddNullCaptain() {
-        assertThrows(InvalidDataAccessApiUsageException.class, () -> {
-            captainService.addCaptain(null);
-        });
-    }
+
 
     @Test
     public void testServiceGetAllEmptyCaptains() {
         List<Captain> captains = captainService.getAllCaptains();
         assertNotNull(captains);
         assertTrue(captains.isEmpty());
+    }
+    @Test
+    public void testServiceAddNullCaptain() {
+        assertThrows(InvalidDataAccessApiUsageException.class, () -> {
+            captainService.addCaptain(null);
+        });
     }
 
     @Test
@@ -725,6 +728,16 @@ class Mini2ApplicationTests {
             captainService.getCaptainById(null);
         });
     }
+    @Test
+    public void testServiceGetFromEmptyListCaptainsByRating() {
+
+        Double ratingThreshold = 4.0;
+        List<Captain> retrievedCaptains = captainService.getCaptainsByRating(ratingThreshold);
+
+
+        assertNotNull(retrievedCaptains);
+        assertEquals(0, retrievedCaptains.size());
+    }
 
     @Test
     public void testServiceGetCaptainsByRating() {
@@ -734,35 +747,17 @@ class Mini2ApplicationTests {
         captainService.addCaptain(captain1);
         captainService.addCaptain(captain2);
 
-        // Act: Retrieve captains with rating above threshold
+
         Double ratingThreshold = 4.0;
         List<Captain> retrievedCaptains = captainService.getCaptainsByRating(ratingThreshold);
 
-        // Assert: Check that the correct captains are retrieved
+
         assertNotNull(retrievedCaptains);
         assertEquals(2, retrievedCaptains.size());
         assertTrue(retrievedCaptains.get(0).getName().equals("Captain A"));
         assertTrue(retrievedCaptains.get(1).getName().equals("Captain B"));
     }
 
-    @Test
-    public void testServiceGetFromEmptyListCaptainsByRating() {
-        // Act: Retrieve captains with rating above threshold
-        Double ratingThreshold = 4.0;
-        List<Captain> retrievedCaptains = captainService.getCaptainsByRating(ratingThreshold);
-
-        // Assert: Check that the correct captains are retrieved
-        assertNotNull(retrievedCaptains);
-        assertEquals(0, retrievedCaptains.size());
-    }
-
-    @Test
-    public void testServiceAddCustomer() {
-        Customer customer = new Customer("Jane Doe", "jane@example.com", "1234567890");
-        Customer savedCustomer = customerService.addCustomer(customer);
-        assertNotNull(savedCustomer);
-        assertEquals("Jane Doe", savedCustomer.getName());
-    }
 
     @Test
     public void testServiceGetAllCustomers() {
@@ -774,5 +769,15 @@ class Mini2ApplicationTests {
         assertNotNull(customers);
         assertTrue(customers.size()==2);
     }
+
+    @Test
+    public void testServiceAddCustomer() {
+        Customer customer = new Customer("Jane Doe", "jane@example.com", "1234567890");
+        Customer savedCustomer = customerService.addCustomer(customer);
+        assertNotNull(savedCustomer);
+        assertEquals("Jane Doe", savedCustomer.getName());
+    }
+
+
 
 }
