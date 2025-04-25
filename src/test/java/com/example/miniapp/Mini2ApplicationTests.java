@@ -119,13 +119,10 @@ class Mini2ApplicationTests {
 
     @BeforeEach
     public void setup() {
-        // Ensure all records are deleted
 
-        // paymentRepository.deleteAll();
-        // tripRepository.deleteAll();
+
         ratingRepository.deleteAll();
-        // captainRepository.deleteAll();
-        // customerRepository.deleteAll();
+
     }
     public static Field findFieldIgnoreCase(Class<?> clazz, String fieldName) {
         Field[] declaredFields = clazz.getDeclaredFields();
@@ -134,7 +131,7 @@ class Mini2ApplicationTests {
                 return field;
             }
         }
-        return null; // Field not found
+        return null;
     }
 
     Field getID(String ClassPath) throws ClassNotFoundException, NoSuchFieldException {
@@ -183,16 +180,16 @@ class Mini2ApplicationTests {
         captainService.addCaptain(new Captain("Captain A", "123", 4.5));
         captainService.addCaptain(new Captain("Captain B", "456", 3.2));
 
-        // Set the rating threshold
+
         double ratingThreshold = 4.0;
 
-        // Make the GET request to the endpoint
+
         ResponseEntity<List> response = restTemplate.getForEntity(
                 BASE_URL_CAPTAIN + "/filterByRating?ratingThreshold=" + ratingThreshold,
                 List.class
         );
 
-        // Validate the response
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
     }
@@ -425,7 +422,7 @@ class Mini2ApplicationTests {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        // assertTrue(response.getBody().size() >= 1);
+
     }
 
     @Test
@@ -731,7 +728,7 @@ class Mini2ApplicationTests {
 
     @Test
     public void testServiceGetCaptainsByRating() {
-        // Add sample captains
+
         Captain captain1 = new Captain("Captain A", "12345", 4.5);
         Captain captain2 = new Captain("Captain B", "67890", 4.8);
         captainService.addCaptain(captain1);
